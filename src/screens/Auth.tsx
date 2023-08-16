@@ -1,13 +1,23 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image, Button, Platform } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Button,
+  Platform,
+  // Easing,
+  SafeAreaView,
+  // Animated,
+} from "react-native";
 import * as Google from "expo-auth-session/providers/google";
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as AuthSession from "expo-auth-session";
 import { authSlice } from "api/slices/auth";
 import { IProfile } from "types/IProfile";
 import * as WebBrowser from "expo-web-browser";
-import { Link } from "@react-navigation/native";
+import { Link, useLinkTo } from "@react-navigation/native";
 import { AuthNavProps } from "navigation/authStack";
 import { useTypedSelector } from "hooks/useTypedSelector";
 import { useTypedDispatch } from "hooks/useTypedDispatch";
@@ -22,8 +32,8 @@ const redirectUri = AuthSession.makeRedirectUri({
 });
 
 export default function Auth({ navigation }: AuthNavProps) {
-  const [googleUser, setGoogleUser] = useState<Omit<IProfile, "token">>();
-  const [googleToken, setGoogleToken] = useState<AuthSession.TokenResponse>();
+  // const [googleUser, setGoogleUser] = useState<Omit<IProfile, "token">>();
+  // const [googleToken, setGoogleToken] = useState<AuthSession.TokenResponse>();
   const [requireRefreshGoogle, setRequireRefreshGoogle] = useState(false);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
@@ -37,6 +47,7 @@ export default function Auth({ navigation }: AuthNavProps) {
   });
 
   const profileSelector = useTypedSelector((state) => state.auth.profile);
+
   const dispatch = useTypedDispatch();
 
   const getClientId = () => {
@@ -50,43 +61,43 @@ export default function Auth({ navigation }: AuthNavProps) {
     }
   };
 
-  const refreshToken = async () => {
-    const clientId = getClientId();
+  // const refreshToken = async () => {
+  //   const clientId = getClientId();
 
-    console.log(`--- refreshToken/clientId:`, clientId);
-    console.log(
-      `--- refreshToken/googleToken?.refreshToken:`,
-      googleToken?.refreshToken
-    );
+  //   console.log(`--- refreshToken/clientId:`, clientId);
+  //   console.log(
+  //     `--- refreshToken/googleToken?.refreshToken:`,
+  //     googleToken?.refreshToken
+  //   );
 
-    const tokenResult = await AuthSession.refreshAsync(
-      {
-        clientId: clientId,
-        refreshToken: googleToken?.refreshToken,
-      },
-      {
-        tokenEndpoint: "https://www.googleapis.com/oauth2/v4/token",
-      }
-    );
+  //   const tokenResult = await AuthSession.refreshAsync(
+  //     {
+  //       clientId: clientId,
+  //       refreshToken: googleToken?.refreshToken,
+  //     },
+  //     {
+  //       tokenEndpoint: "https://www.googleapis.com/oauth2/v4/token",
+  //     }
+  //   );
 
-    tokenResult.refreshToken = googleToken?.refreshToken;
+  //   tokenResult.refreshToken = googleToken?.refreshToken;
 
-    console.log(`--- refreshToken/tokenResult:`, tokenResult);
+  //   console.log(`--- refreshToken/tokenResult:`, tokenResult);
 
-    setGoogleToken(tokenResult);
+  //   setGoogleToken(tokenResult);
 
-    authSlice.actions.googleToken({ token: tokenResult });
+  //   authSlice.actions.googleToken({ token: tokenResult });
 
-    await AsyncStorage.setItem("google", JSON.stringify(tokenResult));
+  //   await AsyncStorage.setItem("google", JSON.stringify(tokenResult));
 
-    setRequireRefreshGoogle(false);
-  };
+  //   setRequireRefreshGoogle(false);
+  // };
 
   useEffect(() => {
     console.log(`--- googleAuth/response:`, response);
 
     if (response !== null && response.type === "success") {
-      setGoogleToken(response.authentication as AuthSession.TokenResponse);
+      // setGoogleToken(response.authentication as AuthSession.TokenResponse);
 
       dispatch(
         authSlice.actions.googleToken({
@@ -111,7 +122,7 @@ export default function Auth({ navigation }: AuthNavProps) {
       if (jsonValue != null) {
         const authFromJson = JSON.parse(jsonValue);
 
-        setGoogleToken(authFromJson);
+        // setGoogleToken(authFromJson);
 
         console.log(`--- getPersistedAuth/authFromJson`, authFromJson);
 
@@ -147,8 +158,8 @@ export default function Auth({ navigation }: AuthNavProps) {
           })
         }
       />
-      {googleToken && (
-        <Link to={{ screen: "Profile", params: { status: 'logged in'} }}>
+      {profileSelector?.token && (
+        <Link to={{ screen: "Profile", params: { status: "logged-in" } }}>
           <Button title="Profile" />
         </Link>
       )}
@@ -163,5 +174,5 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
-  }
+  },
 });

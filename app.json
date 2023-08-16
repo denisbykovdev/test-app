@@ -1,5 +1,6 @@
 {
   "expo": {
+    "jsEngine": "hermes",
     "name": "test-app",
     "slug": "test-app",
     "version": "1.0.0",
@@ -33,7 +34,23 @@
       "tsconfigPaths": true
     },
     "plugins": [
-      "expo-build-properties"
-    ]
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "flipper": true
+          }
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "840cb858-d5c6-4efa-84f8-d97b19fd06f0"
+      }
+    },
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/840cb858-d5c6-4efa-84f8-d97b19fd06f0"
+    }
   }
 }
